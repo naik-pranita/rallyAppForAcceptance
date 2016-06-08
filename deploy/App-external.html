@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BasicRallyApp</title>
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/2.1/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",launch:function(){var iterationCombobox,currentContext=this.getContext(),user=currentContext.getUser(),workspace=currentContext.getDataContext();return console.log(workspace),iterationCombobox=Ext.create("Rally.ui.combobox.IterationComboBox",{listeners:{select:function(combobox){return this.getAcceptance(combobox,workspace)},ready:function(combobox){return this.getAcceptance(combobox,workspace)},scope:this},storeConfig:{fetch:["Name","_ref","ObjectID","State"]}}),this.add(iterationCombobox)},getAcceptance:function(combobox,workspace){var iterationRef=combobox.getRecord().get("_ref"),storyStore,myGrid,customStoreRecords;return this.customStoreRecords=[],storyStore=Ext.create("Rally.data.WsapiDataStore",{model:"User Story",autoLoad:!0,fetch:["Name","ScheduleState","PlanEstimate","PlannedVelocity","_ref"],filters:[{property:"Iteration",operator:"=",value:iterationRef}],listeners:{load:function(store,storyRecords){if(0!==storyRecords.length){var totalEstimate=0,totalAccepted=0,computeAcceptance;Ext.Array.each(storyRecords,function(storyRecords){null!==storyRecords.get("PlanEstimate")?totalEstimate+=parseInt(storyRecords.get("PlanEstimate"),10):totalEstimate=totalEstimate,"Accepted"==storyRecords.get("ScheduleState")&&(totalAccepted+=parseInt(storyRecords.get("PlanEstimate"),10))});var acceptance=Math.floor(100*(totalAccepted/totalEstimate)),Team=workspace._refObjectName;console.log("totalEstimate"+totalEstimate),console.log("totalAccepted"+totalAccepted),console.log("% Acceptance"+acceptance),this.customStoreRecords.push({Acceptance:acceptance,team:Team});var myStore;myStore=Ext.create("Rally.data.custom.Store",{data:this.customStoreRecords}),this.myGrid=Ext.create("Ext.grid.Panel",{title:"ACCEPTANCE",store:myStore,columns:[{text:"Team",dataIndex:"team",flex:1},{text:"Acceptance",dataIndex:"Acceptance",flex:1}],height:200,width:400}),this.add(this.myGrid)}},scope:this}})}});
+
+            Rally.launchApp('CustomApp', {
+                name:"BasicRallyApp",
+	            parentRepos:""
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        
+    </style>
+</head>
+<body>
+</body>
+</html>
